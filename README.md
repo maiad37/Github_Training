@@ -1,2 +1,2 @@
-# Github_Training
-Welcome to my project!
+# Training
+Files for training assignments
