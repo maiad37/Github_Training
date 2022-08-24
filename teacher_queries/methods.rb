@@ -14,16 +14,16 @@ def get_subject_teacher(client, subject_id)
   t = "select teachers_maia.first_name, teachers_maia.middle_name, teachers_maia.last_name, subjects_maia.name from teachers_maia JOIN subjects_maia ON teachers_maia.subject_id = subjects_maia.id WHERE subject_id = #{subject_id}"
 
   teacher_subject = client.query(t).to_a
-  counter = 0
+  str = ""
 
   if teacher_subject.count.zero?
-    "Not found!"
+    str = "Not found!"
   else
-    puts "Subject: #{teacher_subject[0]['name']}\nTeachers: "
-    while counter < teacher_subject.count
-      puts "#{teacher_subject[counter]['first_name']} #{teacher_subject[counter]['middle_name']} #{teacher_subject[counter]['last_name']}"
-      counter +=1
+    str += "Subject: #{teacher_subject[0]['name']}\nTeachers: "
+    teacher_subject.each do |row|
+      str += "\n#{row['first_name']} #{row['middle_name']} #{row['last_name']}"
     end
+    str
     end
 end
 
@@ -37,16 +37,16 @@ JOIN classes_maia ON classes_maia.classes_id = teachers_classes_maia.class_id
 WHERE classes_maia.name = '#{className}'"
 
   classes_subject = client.query(classes).to_a
-  counter = 0
 
+  str=""
   if classes_subject.count.zero?
-    puts "No results!"
+    str = "No results!"
   else
-    puts "Class: #{classes_subject[0]["class"]}\nSubjects:\n"
-    while counter < classes_subject.count
-      puts "#{classes_subject[counter]["subject"]} - #{classes_subject[counter]["first_name"]} #{classes_subject[counter]["middle_name"][0]}. #{classes_subject[counter]["last_name"]}"
-      counter+=1
-    end
+  str +="Class: #{classes_subject[0]["class"]}\nSubjects:"
+  classes_subject.each do |row|
+    str+= "\n#{row["subject"]} - #{row["first_name"]} #{row["middle_name"][0]}. #{row["last_name"]}"
+  end
+    str
   end
 end
 
@@ -56,17 +56,18 @@ def get_teachers_list_by_letter(client, letter)
 FROM teachers_classes_maia
 JOIN teachers_maia ON teachers_maia.teacher_id = teachers_classes_maia.teacher_id
 JOIN subjects_maia ON subjects_maia.id = teachers_maia.subject_id
-WHERE teachers_maia.first_name LIKE '%#{letter}%' OR teachers_maia.last_name LIKE '%#{letter}%'"
+WHERE teachers_maia.first_name LIKE '%#{letter}%' OR teachers_maia.last_name LIKE '%#{letter}%'
+GROUP BY teachers_maia.first_name"
 
   teachers_subjects = client.query(ts).to_a
-  counter = 0
+  str = ""
 
   if teachers_subjects.count.zero?
-    puts "No results!"
+    str = "No results!"
   else
-  while counter < teachers_subjects.count
-    puts "#{teachers_subjects[counter]["first_name"][0]}. #{teachers_subjects[counter]["middle_name"][0]}. #{teachers_subjects[counter]["last_name"]} - #{teachers_subjects[counter]["subject"]}"
-    counter +=1
+  teachers_subjects.each do |row|
+    str += "#{row["first_name"][0]}. #{row["middle_name"][0]}. #{row["last_name"]} - #{row["subject"]}\n"
   end
   end
+  str
 end
