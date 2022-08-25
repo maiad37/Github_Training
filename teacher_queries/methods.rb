@@ -116,3 +116,34 @@ def get_teachers_by_year(client, year)
     str
   end
 end
+
+#7
+def random_date(start_year, finish_year)
+  month = rand(1..12)
+  day = rand(1..28)
+  year = rand(start_year..finish_year)
+  Date.new(year, month, day)
+end
+
+#8
+def random_last_names(client, n)
+  r = "SELECT last_name FROM last_names ORDER BY rand() LIMIT #{n}"
+  rand_last_names = client.query(r).to_a
+  arr = []
+  rand_last_names.each do |name|
+    arr << "#{name["last_name"]}"
+  end
+  puts arr.join(", ")
+end
+
+#9
+def random_first_names(client, n)
+  r = "SELECT names FROM female_names UNION ALL
+SELECT FirstName AS names FROM male_names  ORDER BY rand() LIMIT #{n}; "
+  arr = []
+  rand_first_names = client.query(r).to_a
+  rand_first_names.each do |name|
+    arr << "#{name["names"]}"
+  end
+puts arr.join(", ")
+end
