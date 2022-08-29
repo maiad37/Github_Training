@@ -118,11 +118,17 @@ def get_teachers_by_year(client, year)
 end
 
 #7
-def random_date(start_year, finish_year)
-  month = rand(1..12)
-  day = rand(1..28)
-  year = rand(start_year..finish_year)
-  Date.new(year, month, day)
+def random_date(start_year, finish_year, n)
+  counter = 0
+  arr = []
+  while counter < n
+    month = rand(1..12)
+    day = rand(1..28)
+    year = rand(start_year..finish_year)
+    arr << Date.new(year, month, day)
+    counter += 1
+  end
+  arr.join(",")
 end
 
 #8
@@ -133,17 +139,40 @@ def random_last_names(client, n)
   rand_last_names.each do |name|
     arr << "#{name["last_name"]}"
   end
-  puts arr.join(", ")
+  arr.join(",")
 end
 
+#FASTER WAY USING INSTANCE VARIABLES!
+def last_names(n, client)
+  l = "SELECT last_name FROM last_names"
+  @results = @results ? @results : client.query(l).to_a
+  res = @results.sample(n).map{|r| "#{r['last_name']}"}.join(', ')
+  if @results.count == 0
+    "Nothing found"
+  else
+    "#{res}"
+  end
+end
 #9
 def random_first_names(client, n)
   r = "SELECT names FROM female_names UNION ALL
-SELECT FirstName AS names FROM male_names  ORDER BY rand() LIMIT #{n}; "
+SELECT FirstName AS names FROM male_names ORDER BY rand() LIMIT #{n}; "
   arr = []
   rand_first_names = client.query(r).to_a
   rand_first_names.each do |name|
     arr << "#{name["names"]}"
   end
-puts arr.join(", ")
+  arr.join(",")
+end
+
+#10
+def random_people(client, n)
+  arr = (0..n-1)
+  date = random_date(1910, 2022, n).split(",").to_a
+  name = random_first_names(client, n).split(",").to_a
+  last = random_last_names(client, n).split(",").to_a
+  arr.each do |x|
+    x = arr.find_index(x)
+    client.query("INSERT INTO random_people_maia (first_name, last_name, birth_date) VALUES('#{name[x]}', '#{last[x]}', '#{date[x]}')")
+  end
 end
